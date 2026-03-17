@@ -44,7 +44,7 @@
   ${GetTime} "" "L" $3 $4 $5 $6 $7 $8 $9
   FileWrite $2 "warmup-start: $5-$4-$3 $6:$7:$8$\r$\n"
 
-  nsExec::ExecToStack '"$INSTDIR\${APP_EXECUTABLE_FILENAME}" "$INSTDIR\resources\cfmind\warmup-compile-cache.cjs" --cache-dir "$1"'
+  nsExec::ExecToStack '"$INSTDIR\${APP_EXECUTABLE_FILENAME}" "$INSTDIR\resources\app.asar.unpacked\node_modules\openclaw\warmup-compile-cache.cjs" --cache-dir "$1"'
   Pop $0
   Pop $1
 

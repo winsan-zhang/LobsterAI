@@ -5,7 +5,7 @@ import fs from 'fs';
 import net from 'net';
 import path from 'path';
 import { getElectronNodeRuntimePath } from './coworkUtil';
-import { syncLocalOpenClawExtensionsIntoRuntime } from './openclawLocalExtensions';
+import { syncLocalOpenClawExtensionsIntoRuntime, syncNpmPluginsIntoRuntime } from './openclawLocalExtensions';
 import { applyBundledOpenClawRuntimeHotfixes } from './openclawRuntimeHotfix';
 
 const DEFAULT_OPENCLAW_VERSION = '2026.2.23';
@@ -257,6 +257,11 @@ export class OpenClawEngineManager extends EventEmitter {
       return this.getStatus();
     }
 
+    const pluginSync = syncNpmPluginsIntoRuntime(runtime.root);
+    if (pluginSync.synced.length > 0) {
+      console.log(`[OpenClaw] synced npm plugins: ${pluginSync.synced.join(', ')}`);
+    }
+
     const localExtensionSync = syncLocalOpenClawExtensionsIntoRuntime(runtime.root);
     if (localExtensionSync.copied.length > 0) {
       console.log(`[OpenClaw] synced local extensions: ${localExtensionSync.copied.join(', ')}`);
@@ -464,16 +469,22 @@ export class OpenClawEngineManager extends EventEmitter {
 
   private resolveRuntimeMetadata(): RuntimeMetadata {
     const candidateRoots = app.isPackaged
-      ? [path.join(process.resourcesPath, 'cfmind')]
+      ? [
+          path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'openclaw'),
+          // Legacy fallback for existing installations
+          path.join(process.resourcesPath, 'cfmind'),
+        ]
       : [
+          path.join(app.getAppPath(), 'node_modules', 'openclaw'),
+          // Legacy fallback for development
           path.join(app.getAppPath(), 'vendor', 'openclaw-runtime', 'current'),
           path.join(process.cwd(), 'vendor', 'openclaw-runtime', 'current'),
         ];
 
     const runtimeRoot = findPath(candidateRoots);
     const expectedPathHint = app.isPackaged
-      ? path.join(process.resourcesPath, 'cfmind')
-      : path.join(app.getAppPath(), 'vendor', 'openclaw-runtime', 'current');
+      ? path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'openclaw')
+      : path.join(app.getAppPath(), 'node_modules', 'openclaw');
 
     if (!runtimeRoot) {
       return {

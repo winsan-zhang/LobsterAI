@@ -59,6 +59,8 @@ try {
 // Find the gateway bundle
 const bundleCandidates = [
   path.join(__dirname, 'gateway-bundle.mjs'),
+  path.join(__dirname, '..', 'resources', 'app.asar.unpacked', 'node_modules', 'openclaw', 'gateway-bundle.mjs'),
+  // Legacy fallback
   path.join(__dirname, '..', 'resources', 'cfmind', 'gateway-bundle.mjs'),
 ];
 

@@ -3,12 +3,22 @@
 const fs = require('fs');
 const path = require('path');
 
+function resolveDefaultRuntimeRoot(rootDir) {
+  // Try npm package location first
+  const npmPath = path.join(rootDir, 'node_modules', 'openclaw');
+  if (fs.existsSync(npmPath)) {
+    return npmPath;
+  }
+  // Fallback to legacy vendor path
+  return path.join(rootDir, 'vendor', 'openclaw-runtime', 'current');
+}
+
 function syncLocalOpenClawExtensions(runtimeRoot) {
   const rootDir = path.resolve(__dirname, '..');
   const sourceDir = path.join(rootDir, 'openclaw-extensions');
   const targetRoot = runtimeRoot
     ? path.resolve(runtimeRoot)
-    : path.join(rootDir, 'vendor', 'openclaw-runtime', 'current');
+    : resolveDefaultRuntimeRoot(rootDir);
   const targetExtensionsDir = path.join(targetRoot, 'extensions');
 
   if (!fs.existsSync(sourceDir)) {

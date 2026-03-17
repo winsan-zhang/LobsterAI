@@ -361,10 +361,29 @@ const buildProviderSelection = (options: {
   };
 };
 
+const KNOWN_OPENCLAW_PLUGINS: Record<string, string> = {
+  '@dingtalk-real-ai/dingtalk-connector': 'dingtalk-connector',
+  '@larksuiteoapi/feishu-openclaw-plugin': 'feishu-openclaw-plugin',
+  '@sliverp/qqbot': 'qqbot',
+  '@wecom/wecom-openclaw-plugin': 'wecom-openclaw-plugin',
+};
+
 const readPreinstalledPluginIds = (): string[] => {
   try {
     const pkgPath = path.join(app.getAppPath(), 'package.json');
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+
+    // New approach: derive plugin IDs from npm dependencies
+    const deps = pkg.dependencies || {};
+    const pluginIds: string[] = [];
+    for (const [npmName, pluginId] of Object.entries(KNOWN_OPENCLAW_PLUGINS)) {
+      if (npmName in deps) {
+        pluginIds.push(pluginId);
+      }
+    }
+    if (pluginIds.length > 0) return pluginIds;
+
+    // Legacy fallback: read from openclaw.plugins config
     const plugins = pkg.openclaw?.plugins;
     if (!Array.isArray(plugins)) return [];
     return plugins
