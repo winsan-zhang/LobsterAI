@@ -2960,6 +2960,41 @@ if (!gotTheLock) {
   });
 
   // Weixin QR login
+
+  /**
+   * Remove stale weixin account files and rewrite the index to contain only
+   * the newly logged-in accountId. Each QR scan creates a new accountId but
+   * old entries are never cleaned up, causing expired-session errors.
+   */
+  const cleanupStaleWeixinAccounts = (stateDir: string, keepAccountId: string) => {
+    const weixinDir = path.join(stateDir, 'openclaw-weixin');
+    const accountsDir = path.join(weixinDir, 'accounts');
+    const indexPath = path.join(weixinDir, 'accounts.json');
+
+    // Rewrite index to only keep the new account
+    if (keepAccountId) {
+      try {
+        fs.writeFileSync(indexPath, JSON.stringify([keepAccountId], null, 2), 'utf-8');
+        console.log(`[IMGatewayManager] Weixin accounts index updated to [${keepAccountId}]`);
+      } catch {
+        // best-effort
+      }
+    }
+
+    // Delete account files that don't belong to the new account
+    try {
+      const files = fs.readdirSync(accountsDir);
+      for (const file of files) {
+        if (!file.endsWith('.json')) continue;
+        if (keepAccountId && file.startsWith(keepAccountId)) continue;
+        fs.unlinkSync(path.join(accountsDir, file));
+        console.log(`[IMGatewayManager] Deleted stale weixin account file: ${file}`);
+      }
+    } catch {
+      // directory may not exist
+    }
+  };
+
   ipcMain.handle('im:weixin:qr-login-start', async () => {
     try {
       const result = await getIMGatewayManager().weixinQrLoginStart();
@@ -2973,10 +3008,16 @@ if (!gotTheLock) {
     try {
       const result = await getIMGatewayManager().weixinQrLoginWait(accountId);
       if (result.connected) {
+        // Clean up stale weixin accounts — each QR scan creates a new accountId
+        // but old ones are never removed, causing expired-session errors on restart.
+        const manager = getOpenClawEngineManager();
+        const newAccountId = result.accountId ? result.accountId.replace(/@/g, '-').replace(/\./g, '-') : '';
+        cleanupStaleWeixinAccounts(manager.getStateDir(), newAccountId);
+
         // Restart gateway so the plugin picks up the new token and starts
         // a fresh monitor loop (the old one may be stuck in a session pause).
         console.log('[IMGatewayManager] Weixin login succeeded, restarting OpenClaw gateway');
-        await getOpenClawEngineManager().restartGateway();
+        await manager.restartGateway();
       }
       return { success: true, ...result };
     } catch (error) {
