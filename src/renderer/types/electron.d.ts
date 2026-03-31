@@ -429,6 +429,8 @@ interface IElectronAPI {
     getOpenClawConfigSchema: () => Promise<{ success: boolean; result?: { schema: Record<string, unknown>; uiHints: Record<string, Record<string, unknown>> }; error?: string }>;
     weixinQrLoginStart: () => Promise<{ success: boolean; qrDataUrl?: string; message: string; sessionKey?: string }>;
     weixinQrLoginWait: (accountId?: string) => Promise<{ success: boolean; connected: boolean; message: string; accountId?: string }>;
+    popoQrLoginStart: () => Promise<{ success: boolean; qrUrl?: string; taskToken?: string; timeoutMs?: number; message?: string }>;
+    popoQrLoginPoll: (taskToken: string) => Promise<{ success: boolean; appKey?: string; appSecret?: string; aesKey?: string; message: string }>;
     listPairingRequests: (platform: string) => Promise<{
       success: boolean;
       requests: Array<{ id: string; code: string; createdAt: string; lastSeenAt: string; meta?: Record<string, string> }>;
