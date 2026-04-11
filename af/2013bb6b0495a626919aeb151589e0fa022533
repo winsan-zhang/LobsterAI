@@ -1,0 +1,36 @@
+scripts/nsis-installer.nsh
+  59c8c8f25a9c3016 40-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "af2013bb6b0495a626919aeb151589e0fa022533",
+  "prompts": {
+    "59c8c8f25a9c3016": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ae2c3d34-9132-4fe5-bd5a-508a26ecc525",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "zhangxiaochang",
+      "messages": [],
+      "total_additions": 30850,
+      "total_deletions": 18,
+      "accepted_lines": 30845,
+      "overriden_lines": 0
+    },
+    "844e2639c7e50b59": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7931e625-8b77-4310-b8ab-9251b7874118",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "zhangxiaochang",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
